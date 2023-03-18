@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// for authorization, you will use
+// Route::get('oauth/token');
+// it gets token using passport.token › Laravel\Passport › AccessTokenController@issueToken
