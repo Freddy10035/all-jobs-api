@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\JobController;
+use App\Http\Controllers\Api\V1\BrighterMondayJobController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,4 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/jobs', [JobController::class, 'getAllJobs']);
+// api/v1
+Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function () {
+    Route::apiResource('jobs', BrighterMondayJobController::class);
+
+    Route::get('/getJobCount', 'BrighterMondayJobController@getJobCount');
+    Route::get('/jobs/location/{location}', 'BrighterMondayJobController@getJobCountByLocation');
+    Route::get('/jobs/search', 'BrighterMondayJobController@searchJobs');
+});
+
