@@ -19,7 +19,9 @@ class BrighterMondayJobController extends Controller
         try {
             $query = $this->jobs_db
                 ->table('BrighterMonday')
-                ->select('*')
+                //->select('*')
+                // This should return the id field as a string in the response.
+                ->select('*', DB::raw('CAST(id as CHAR(255)) as id'))
                 ->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
