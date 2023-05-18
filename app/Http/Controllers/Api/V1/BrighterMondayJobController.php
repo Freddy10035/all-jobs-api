@@ -21,19 +21,21 @@ class BrighterMondayJobController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('perPage') ?? 10; // default to 10 items per page
-        $page = $request->input('page') ?? 1; // default to the first page
+        // $perPage = $request->input('perPage') ?? 10; // default to 10 items per page
+        // $page = $request->input('page') ?? 1; // default to the first page
 
         try {
             $query = $this->jobs_db
                 ->table('BrighterMonday')
-                ->select('*')
-                // This should return the id field as a string in the response.
-                //->select('*', DB::raw('CAST(id as CHAR(255)) as id'))
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->select('job_title', 'company_name', 'job_location', 'job_type', 'job_salary', 'job_function', 'date_posted', 'job_link', 'job_summary', 'min_qualifications', 'experience_level', 'experience_length')
+                ->orderBy('created_on', 'desc')
+                ->limit(100)
+                ->get();
 
             return response()->json([
                 'success' => true,
+                //get the count
+                'count' => $query->count(),
                 'data' => $query
             ]);
         } catch (Exception $e) {
@@ -43,7 +45,6 @@ class BrighterMondayJobController extends Controller
             ]);
         }
     }
-
 
 
     // gets a single job from the BrighterMonday Table
@@ -88,60 +89,26 @@ class BrighterMondayJobController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    // public function store(Request $request)
-    // {
-    //     try {
-    //         $query = $this->jobs_db
-    //             ->table('BrighterMonday')
-    //             ->insert([
-    //                 'job_title' => $request->job_title,
-    //                 'company_name' => $request->company_name,
-    //                 'job_location' => $request->job_location,
-    //                 'job_type' => $request->job_type,
-    //                 'job_salary' => $request->job_salary,
-    //                 'job_function' => $request->job_function,
-    //                 'date_posted' => $request->date_posted,
-    //                 'job_link' => $request->job_link,
-    //                 'job_summary' => $request->job_summary,
-    //                 'min_qualifications' => $request->min_qualifications,
-    //                 'experience_level' => $request->experience_level,
-    //                 'experience_length' => $request->experience_length,
-    //                 'job_requirements' => $request->job_requirements
-    //             ]);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $query
-    //         ]);
-    //     } catch (Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'job_title' => 'required',
-            'company_name' => 'required',
-            'job_location' => 'required',
-            'job_type' => 'required',
-            'job_salary' => 'required',
-            'job_function' => 'required',
-            'date_posted' => 'required|date',
-            'job_link' => 'required|url',
-            'job_summary' => 'required',
-            'min_qualifications' => 'required',
-            'experience_level' => 'required',
-            'experience_length' => 'required',
-            'job_requirements' => 'required'
-        ]);
-
         try {
             $query = $this->jobs_db
                 ->table('BrighterMonday')
-                ->insert($validatedData);
+                ->insert([
+                    'job_title' => $request->input('job_title'),
+                    'company_name' => $request->input('company_name'),
+                    'job_location' => $request->input('job_location'),
+                    'job_type' => $request->input('job_type'),
+                    'job_salary' => $request->input('job_salary'),
+                    'job_function' => $request->input('job_function'),
+                    'date_posted' => $request->input('date_posted'),
+                    'job_link' => $request->input('job_link'),
+                    'job_summary' => $request->input('job_summary'),
+                    'min_qualifications' => $request->input('min_qualifications'),
+                    'experience_level' => $request->input('experience_level'),
+                    'experience_length' => $request->input('experience_length'),
+                    'job_requirements' => $request->input('job_requirements')
+                ]);
 
             return response()->json([
                 'success' => true,
@@ -164,81 +131,56 @@ class BrighterMondayJobController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    // public function update(Request $request, $id)
-    // {
-    //     try {
-    //         $query = $this->jobs_db
-    //             ->table('BrighterMonday')
-    //             ->where('id', $id)
-    //             ->update([
-    //                 'job_title' => $request->job_title,
-    //                 'company_name' => $request->company_name,
-    //                 'job_location' => $request->job_location,
-    //                 'job_type' => $request->job_type,
-    //                 'job_salary' => $request->job_salary,
-    //                 'job_function' => $request->job_function,
-    //                 'date_posted' => $request->date_posted,
-    //                 'job_link' => $request->job_link,
-    //                 'job_summary' => $request->job_summary,
-    //                 'min_qualifications' => $request->min_qualifications,
-    //                 'experience_level' => $request->experience_level,
-    //                 'experience_length' => $request->experience_length,
-    //                 'job_requirements' => $request->job_requirements
-    //             ]);
 
-    //         if ($query === 0) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Record not found or update failed'
-    //             ]);
-    //         }
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $query
-    //         ]);
-    //     } catch (Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'job_title' => 'sometimes|required',
-            'company_name' => 'sometimes|required',
-            'job_location' => 'sometimes|required',
-            'job_type' => 'sometimes|required',
-            'job_salary' => 'sometimes|required',
-            'job_function' => 'sometimes|required',
-            'date_posted' => 'sometimes|required|date',
-            'job_link' => 'sometimes|required|url',
-            'job_summary' => 'sometimes|required',
-            'min_qualifications' => 'sometimes|required',
-            'experience_level' => 'sometimes|required',
-            'experience_length' => 'sometimes|required',
-            'job_requirements' => 'sometimes|required'
-        ]);
-
         try {
-            $query = $this->jobs_db
-                ->table('BrighterMonday')
-                ->where('id', $id)
-                ->update($validatedData);
+            // Get the record to update
+            $record = $this->jobs_db->table('BrighterMonday')->find($id);
 
-            if ($query === 0) {
+            // Check if the record exists
+            if (!$record) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Record not found or update failed'
+                    'message' => 'Record not found'
                 ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'data' => $query
+            // Validate the input fields
+            $fieldsToUpdate = $request->validate([
+                'job_title' => 'sometimes|required|string',
+                'company_name' => 'sometimes|required|string',
+                'job_location' => 'sometimes|required|string',
+                'job_type' => 'sometimes|required|string',
+                'job_salary' => 'sometimes|required|string',
+                'job_function' => 'sometimes|required|string',
+                'date_posted' => 'sometimes|required|date',
+                'job_link' => 'sometimes|required|url',
+                'job_summary' => 'sometimes|required|string',
+                'min_qualifications' => 'sometimes|required|string',
+                'experience_level' => 'sometimes|required|string',
+                'experience_length' => 'sometimes|required|string',
+                'job_requirements' => 'sometimes|required|string'
             ]);
+
+            // Check if there are any fields to update
+            if (empty($fieldsToUpdate)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No fields to update'
+                ]);
+            } else {
+                // Update the record
+                $this->jobs_db->table('BrighterMonday')
+                    ->where('id', $id)
+                    ->update($fieldsToUpdate);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Record updated successfully'
+                ]);
+            }
+
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -246,7 +188,6 @@ class BrighterMondayJobController extends Controller
             ]);
         }
     }
-
 
 
     // deletes a job listing based on Id
@@ -346,7 +287,7 @@ class BrighterMondayJobController extends Controller
             $search = $request->input('search');
 
             $query = $this->jobs_db
-                ->table('all_available_jobs.BrighterMonday')
+                ->table('BrighterMonday')
                 ->where(function ($q) use ($search) {
                     $q->where('job_title', 'like', '%' . $search . '%')
                         ->orWhere('company_name', 'like', '%' . $search . '%')
@@ -461,4 +402,39 @@ class BrighterMondayJobController extends Controller
             ], 500);
         }
     }
+
+    public function filterSearch(Request $request)
+    {
+        try {
+            $job_title = '%' . $request->input('job_title') . '%'; //search for similar job titles
+            $job_location = '%' . $request->input('job_location') . '%';
+            $job_type = '%' . $request->input('job_type') . '%';
+
+            $jobs = $this->jobs_db
+                ->table('BrighterMonday')
+                ->where('job_title', 'like', $job_title)
+                ->where('job_location', 'like', $job_location)
+                ->where('job_type', 'like', $job_type)
+                ->select('id', 'job_title', 'job_location', 'job_function', 'job_link', 'job_summary')
+                ->get();
+
+            if ($jobs->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No jobs found.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'jobs' => $jobs
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
 }
